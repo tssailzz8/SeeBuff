@@ -129,6 +129,7 @@ namespace SeeBuff
 
             try
             {
+                if (pi.ClientState.LocalPlayer == null) return;
                 var array = new Dictionary<int, IntPtr>();
                 var addon = XivApi.GetSafeAddonNamePlate();
                 for (int i = 0; i < 50; i++)
@@ -146,7 +147,10 @@ namespace SeeBuff
                         var actorID = npInfo.Data.ActorID;
                         if (actorID == -1)
                             continue;
+
                         //if (npInfo.Name != "") PluginLog.Error(i+" "+npInfo.Name+npObject.Pointer.ToString("X"));
+
+                        if (*(byte*) (npObject.Pointer + 0x5C) != 0) continue;
 
                         array.Add(actorID, (IntPtr) (*(long*) npObject.Pointer));
                     }
