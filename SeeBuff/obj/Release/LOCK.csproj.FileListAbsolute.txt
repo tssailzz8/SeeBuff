@@ -1,0 +1,7 @@
+D:\卫月\锁定\ChopBamboo\bin\Release\ChopBamboo.json
+D:\卫月\锁定\ChopBamboo\bin\Release\Lock.dll
+D:\卫月\锁定\ChopBamboo\bin\Release\Lock.pdb
+D:\卫月\锁定\ChopBamboo\obj\Release\LOCK.csprojAssemblyReference.cache
+D:\卫月\锁定\ChopBamboo\obj\Release\LOCK.csproj.CoreCompileInputs.cache
+D:\卫月\锁定\ChopBamboo\obj\Release\Lock.dll
+D:\卫月\锁定\ChopBamboo\obj\Release\Lock.pdb
