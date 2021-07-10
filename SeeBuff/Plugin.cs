@@ -100,7 +100,7 @@ namespace SeeBuff
                     {
                     }
 
-                    if (ImGui.SliderFloat("Z调整(与摄像机远近有关)", ref this.configuration.z位置, -20, 20))
+                    if (ImGui.SliderFloat("Z调整(与摄像机远近有关)", ref this.configuration.y位置, 0, -250))
                     {
                     }
 
@@ -115,7 +115,7 @@ namespace SeeBuff
                     if (ImGui.Checkbox("仅在战斗中", ref configuration.战斗))
                     {
                     }
-
+                    ImGui.ColorEdit4("颜色", ref this.configuration.Value, ImGuiColorEditFlags.NoInputs);
                     configuration.Save();
                     //PluginLog.Log(this.configuration.透明度.ToString("X"));
                     ImGui.End();
@@ -179,24 +179,35 @@ namespace SeeBuff
                         continue;
                     }
 
-                    if (!this.configuration.自己 && pi.ClientState.Actors[0].ActorId == localPlayerActorId)
+                    if (!this.configuration.自己 && actor.ActorId == localPlayerActorId)
                     {
                         continue;
                     }
 
                     //var b = pluginInterface.Framework.Gui.WorldToScreen(new SharpDX.Vector3(actor.Position.X, actor.Position.Z - 10, actor.Position.Y), out SharpDX.Vector2 pos);
-                    var screenPosO = new Vector2(pos.X - this.configuration.x位置, pos.Y);
+                    var screenPosO = new Vector2(pos.X - this.configuration.x位置, pos.Y - this.configuration.y位置);
+                    var screenPos1 = screenPosO+new Vector2(5,-15);
 
                     var effects = actor.StatusEffects.Where(i => i.OwnerId == localPlayerActorId)
-                        .Select((effect, i) => (effect.EffectId, i));
+                        .Select((effect, i) => (effect, i));
                     foreach (var effect in effects)
                     {
-                        var status = statusEnumerable.GetRow((uint) effect.EffectId);
+                        var status = statusEnumerable.GetRow((uint) effect.effect.EffectId);
                         var textureWrap = TextureDictionary[status.Icon];
                         var texsize = new Vector2(textureWrap.Width, textureWrap.Height);
                         bdl.AddImage(textureWrap.ImGuiHandle,
                             screenPosO + new Vector2(25 * effect.i, 0),
-                            screenPosO + new Vector2(25 * effect.i, 0) + texsize, Vector2.Zero, Vector2.One, b);
+                            screenPosO + new Vector2(25 * effect.i, 0) + texsize, Vector2   .Zero, Vector2.One, b);
+                        //PluginLog.Log(effect.effect.Duration.ToString("f2"));
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+                        ImGui.Begin("");
+                        ImGui.SetWindowFontScale(1.2f);
+                        //PluginLog.Log(this.configuration.Value.ToString("x"));
+                        bdl.AddText(screenPos1+ new Vector2(25 * effect.i, 0), b, effect.effect.Duration.ToString("f0"));
+                        
+                        ImGui.End();
+                        ImGui.PopStyleColor();
+
                     }
                 }
 
@@ -256,13 +267,15 @@ namespace SeeBuff
         public bool Visible = false;
         public bool Debug = false;
         public bool ConfigUiVisible;
-        public float z位置;
+        public float y位置;
         public float 透明;
+        public int x位置;
+        public bool 战斗;
+        public bool 自己;
+        public Vector4 Value;
 
         [NonSerialized] public DalamudPluginInterface pluginInterface;
-        internal int x位置;
-        internal bool 战斗;
-        internal bool 自己;
+        
 
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
