@@ -84,3 +84,16 @@ D:\卫月\buff\SeeBuff\bin\Release\ImGui.NET.pdb
 D:\卫月\buff\SeeBuff\bin\Release\ImGuiScene.pdb
 D:\卫月\buff\SeeBuff\bin\Release\FFXIVClientStructs.pdb
 D:\卫月\buff\SeeBuff\bin\Release\SDL2-CS.dll.config
+G:\Git\SeeBuff\SeeBuff\bin\Release\ChopBamboo.json
+G:\Git\SeeBuff\SeeBuff\bin\Release\SeeBuff.dll
+G:\Git\SeeBuff\SeeBuff\bin\Release\SeeBuff.pdb
+G:\Git\SeeBuff\SeeBuff\bin\Release\FFXIVClientStructs.dll
+G:\Git\SeeBuff\SeeBuff\bin\Release\System.Memory.dll
+G:\Git\SeeBuff\SeeBuff\bin\Release\System.Buffers.dll
+G:\Git\SeeBuff\SeeBuff\bin\Release\FFXIVClientStructs.pdb
+G:\Git\SeeBuff\SeeBuff\obj\Release\SeeBuff.csproj.CoreCompileInputs.cache
+G:\Git\SeeBuff\SeeBuff\obj\Release\SeeBuff.csproj.CopyComplete
+G:\Git\SeeBuff\SeeBuff\obj\Release\SeeBuff.dll
+G:\Git\SeeBuff\SeeBuff\obj\Release\SeeBuff.pdb
+G:\Git\SeeBuff\SeeBuff\bin\Release\System.Numerics.Vectors.dll
+G:\Git\SeeBuff\SeeBuff\obj\Release\SeeBuff.csprojAssemblyReference.cache
