@@ -199,14 +199,15 @@ namespace SeeBuff
                             screenPosO + new Vector2(25 * effect.i, 0),
                             screenPosO + new Vector2(25 * effect.i, 0) + texsize, Vector2   .Zero, Vector2.One, b);
                         //PluginLog.Log(effect.effect.Duration.ToString("f2"));
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+                        //ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
                         ImGui.Begin("");
                         ImGui.SetWindowFontScale(1.2f);
                         //PluginLog.Log(this.configuration.Value.ToString("x"));
-                        bdl.AddText(screenPos1+ new Vector2(25 * effect.i, 0), b, effect.effect.Duration.ToString("f0"));
+                        bdl.AddText(screenPos1+ new Vector2(25 * effect.i, 0), (uint) ImGui.ColorConvertFloat4ToU32(configuration.Value), effect.effect.Duration.ToString("f0"));
+                        
                         
                         ImGui.End();
-                        ImGui.PopStyleColor();
+                        //ImGui.PopStyleColor();
 
                     }
                 }
