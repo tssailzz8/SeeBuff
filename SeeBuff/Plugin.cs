@@ -33,7 +33,27 @@ namespace SeeBuff
         private DalamudPluginInterface pluginInterface;
 
         private delegate bool TestDeto(IntPtr address);
-
+        public readonly HashSet<ushort> 减伤 = new HashSet<ushort>
+        { 0x49a,//暗黑之夜
+          0x4a7,//铁壁
+          746,//弃明投暗
+          747,//暗影墙
+          810,//行尸走肉
+          735,//原初的直觉
+          0x199,//死斗
+          0x4b9,//亲疏自行
+          89,//复仇
+          0x8b3,//原初的勇猛
+          87,//战栗
+          728,
+          1856,//盾阵
+          74,//预警
+          0x52,//神圣领域
+          1832,//伪装
+          1834,//星云
+          1840,//石之心
+          1836,//超火流星
+        };
         string commandName = "/SeeBuff";
 
         public void Initialize(DalamudPluginInterface pluginInterface)
@@ -100,7 +120,7 @@ namespace SeeBuff
                     {
                     }
 
-                    if (ImGui.SliderFloat("Z调整(与摄像机远近有关)", ref this.configuration.y位置, 0, -250))
+                    if (ImGui.SliderFloat("Y调整", ref this.configuration.y位置, 0, -250))
                     {
                     }
 
@@ -115,7 +135,10 @@ namespace SeeBuff
                     if (ImGui.Checkbox("仅在战斗中", ref configuration.战斗))
                     {
                     }
-                    ImGui.ColorEdit4("颜色", ref this.configuration.Value, ImGuiColorEditFlags.NoInputs);
+                    if (ImGui.Checkbox("显示t减伤", ref configuration.减伤))
+                    {   
+                    }
+                    ImGui.ColorEdit4("颜色", ref this.configuration.Value1, ImGuiColorEditFlags.NoInputs);
                     configuration.Save();
                     //PluginLog.Log(this.configuration.透明度.ToString("X"));
                     ImGui.End();
@@ -165,7 +188,7 @@ namespace SeeBuff
                 var bdl = ImGui.GetBackgroundDrawList(ImGui.GetMainViewport());
                 var b = (uint) ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, this.configuration.透明));
                 //PluginLog.Log("b是{0}",b.ToString("x"));
-
+                this.configuration.Value = new Vector4(this.configuration.Value1.X, this.configuration.Value1.Y, this.configuration.Value1.Z, this.configuration.透明);
                 foreach (var actor in hasmyeffect)
                 {
                     if (!array.TryGetValue(actor.ActorId, out var ptr)) continue;
@@ -186,27 +209,31 @@ namespace SeeBuff
 
                     //var b = pluginInterface.Framework.Gui.WorldToScreen(new SharpDX.Vector3(actor.Position.X, actor.Position.Z - 10, actor.Position.Y), out SharpDX.Vector2 pos);
                     var screenPosO = new Vector2(pos.X - this.configuration.x位置, pos.Y - this.configuration.y位置);
-                    var screenPos1 = screenPosO+new Vector2(5,-15);
+                    
 
-                    var effects = actor.StatusEffects.Where(i => i.OwnerId == localPlayerActorId)
-                        .Select((effect, i) => (effect, i));
+                    var effects = actor.StatusEffects.
+                        Select((effect, i) => (effect, i));
                     foreach (var effect in effects)
                     {
-                        var status = statusEnumerable.GetRow((uint) effect.effect.EffectId);
-                        var textureWrap = TextureDictionary[status.Icon];
-                        var texsize = new Vector2(textureWrap.Width, textureWrap.Height);
-                        bdl.AddImage(textureWrap.ImGuiHandle,
-                            screenPosO + new Vector2(25 * effect.i, 0),
-                            screenPosO + new Vector2(25 * effect.i, 0) + texsize, Vector2   .Zero, Vector2.One, b);
-                        //PluginLog.Log(effect.effect.Duration.ToString("f2"));
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
-                        ImGui.Begin("");
-                        ImGui.SetWindowFontScale(1.2f);
-                        //PluginLog.Log(this.configuration.Value.ToString("x"));
-                        bdl.AddText(screenPos1+ new Vector2(25 * effect.i, 0), b, effect.effect.Duration.ToString("f0"));
-                        
-                        ImGui.End();
-                        ImGui.PopStyleColor();
+                        if ((effect.effect.OwnerId == localPlayerActorId || this.减伤.Contains((ushort)effect.effect.EffectId)&&this.configuration.减伤))
+                        {
+                            var status = statusEnumerable.GetRow((uint)effect.effect.EffectId);
+                            var textureWrap = TextureDictionary[status.Icon];
+                            var texsize = new Vector2(textureWrap.Width, textureWrap.Height);
+                            var screenPos1 = screenPosO + new Vector2(texsize.X/4, -17);
+                            bdl.AddImage(textureWrap.ImGuiHandle,
+                                screenPosO + new Vector2(25 * effect.i, 0),
+                                screenPosO + new Vector2(25 * effect.i, 0) + texsize, Vector2.Zero, Vector2.One, b);
+                            //PluginLog.Log(effect.effect.Duration.ToString("f2"));
+                            //ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+                            ImGui.Begin("##buffdrawlist", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground);
+                            ImGui.SetWindowFontScale(1.5f);
+                            //PluginLog.Log(this.configuration.Value.ToString("x"));
+                            bdl.AddText(screenPos1 + new Vector2(25 * effect.i, 0), (uint)ImGui.ColorConvertFloat4ToU32(configuration.Value), effect.effect.Duration.ToString("f0"));
+                            ImGui.End();
+                            //ImGui.PopStyleColor();
+                        }
+
 
                     }
                 }
@@ -273,6 +300,8 @@ namespace SeeBuff
         public bool 战斗;
         public bool 自己;
         public Vector4 Value;
+        public Vector4 Value1;
+        public bool 减伤;
 
         [NonSerialized] public DalamudPluginInterface pluginInterface;
         
