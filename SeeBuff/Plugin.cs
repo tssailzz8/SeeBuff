@@ -243,7 +243,7 @@ namespace SeeBuff
 					unsafe
 					{
 						var npObject = addon.GetNamePlateObject(i);
-						if (npObject == null || *(byte*)(npObject.Pointer + 0x60) != 0)
+						if (npObject == null || *(byte*)(npObject.Pointer + 0x60) != 0)	//invisible
 							continue;
 
 						var npInfo = npObject.NamePlateInfo;
@@ -256,7 +256,7 @@ namespace SeeBuff
 
 						//if (npInfo.Name != "") PluginLog.Error(i+" "+npInfo.Name+npObject.Pointer.ToString("X"));
 
-						if (*(byte*)(npObject.Pointer + 0x5C) != 0) continue;
+						if (*(byte*)(npObject.Pointer + 0x5C) != 0) continue;	//not pc
 
 						array.Add(actorID, (IntPtr)(*(long*)npObject.Pointer));
 					}
@@ -293,19 +293,22 @@ namespace SeeBuff
 						.Where(i => i.OwnerId == localPlayerActorId || i.OwnerId == localPlayerPet?.ActorId || this.configuration.减伤 && 减伤.Contains((ushort)i.EffectId))
 						.Where(i=>i.Duration>0)
 						.Select((effect, i) => (effect, i));
-                    if (this.configuration.背景)
+                    count = effects.Count();
+                    screenPosOriginal += new Vector2((float)node->AtkResNode.Width / 2 -6.25f -12.5f*count, 0);
+                    if (this.configuration.背景 && count >0)
                     {
-						bdl.AddRectFilled(new Vector2(screenPosOriginal.X-10, screenPosOriginal.Y-10), pos + new Vector2(node->AtkResNode.Width + 32 * count- this.configuration.背图片x, node->AtkResNode.Height - this.configuration.背图片y), 0x80000000, 3);
+						
+						bdl.AddRectFilled(new Vector2(screenPosOriginal.X - this.configuration.背图片x, screenPosOriginal.Y-2 - this.configuration.背图片y),  new Vector2(screenPosOriginal.X + 7 + 25 * count- this.configuration.背图片x, screenPosOriginal.Y + 45 - this.configuration.背图片y), 0x80000000, 3);
 					}
 
 					foreach (var effect in effects)
                     {
-						count = effect.i;
-						var status = statusEnumerable.GetRow((uint)effect.effect.EffectId);
+                        var status = statusEnumerable.GetRow((uint)effect.effect.EffectId);
 						var textureWrap = TextureDictionary[status.Icon];
+                        if (textureWrap == null) continue;
 						var texsize = new Vector2(textureWrap.Width, textureWrap.Height);
-						var screenPos1 = screenPosOriginal + new Vector2(texsize.X /5 , 20);
-						var screenPos2 = screenPosOriginal + new Vector2(texsize.X*2 / 5, 20);
+                        var screenPos1 = screenPosOriginal + new Vector2(texsize.X /5 , 20);
+						var screenPos2 = screenPosOriginal + new Vector2(texsize.X*2 / 5 - 1 , 20);
 						bdl.AddImage(textureWrap.ImGuiHandle,
 							screenPosOriginal + new Vector2(25 * effect.i, 0),
 							screenPosOriginal + new Vector2(25 * effect.i, 0) + texsize, Vector2.Zero, Vector2.One, b);
@@ -316,7 +319,7 @@ namespace SeeBuff
 							ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground);
 						ImGui.SetWindowFontScale(1.5f);
                         //PluginLog.Log(this.configuration.Value.ToString("x"));
-                        if (effect.effect.Duration>10)
+                        if (effect.effect.Duration>=9.5f)
                         {
 							bdl.AddText(screenPos1 + new Vector2(25 * effect.i, 0),
 						(uint)ImGui.ColorConvertFloat4ToU32(configuration.Value),
