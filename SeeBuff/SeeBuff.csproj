@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -33,27 +33,27 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dalamud">
-      <HintPath>E:\da\Dalamud.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\Dalamud.dll</HintPath>
     </Reference>
     <Reference Include="ImGui.NET">
-      <HintPath>E:\da\ImGui.NET.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\ImGui.NET.dll</HintPath>
     </Reference>
     <Reference Include="ImGuiScene">
-      <HintPath>E:\da\ImGuiScene.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\ImGuiScene.dll</HintPath>
     </Reference>
     <Reference Include="Lumina">
-      <HintPath>E:\da\Lumina.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\Lumina.dll</HintPath>
     </Reference>
     <Reference Include="Lumina.Excel">
-      <HintPath>E:\da\Lumina.Excel.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\Lumina.Excel.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>E:\da\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressResolver.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="GameObjectManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextureDictionary.cs" />
