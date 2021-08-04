@@ -167,16 +167,15 @@ namespace SeeBuff
                     return null;
                 }
 
-                var npObjectArrayPtrPtr = Pointer + 0x450;
+                var npObjectArrayPtrPtr = Pointer + Marshal.OffsetOf(typeof(AddonNamePlate), nameof(AddonNamePlate.NamePlateObjectArray)).ToInt32();
                 var npObjectArrayPtr = Marshal.ReadIntPtr(npObjectArrayPtrPtr);
                 if (npObjectArrayPtr == IntPtr.Zero)
                 {
                     PluginLog.Debug($"[{GetType().Name}] NamePlateObjectArray was null");
                     return null;
                 }
-                
 
-                var npObjectPtr = npObjectArrayPtr + 0x70 * index;
+                var npObjectPtr = npObjectArrayPtr + Marshal.SizeOf(typeof(AddonNamePlate.NamePlateObject)) * index;
                 return new SafeNamePlateObject(npObjectPtr, index);
             }
         }
@@ -238,7 +237,7 @@ namespace SeeBuff
                             return null;
                         }
 
-                        var npInfoArrayPtr = XivApi.RaptureAtkModulePtr + 0x1A238;
+                        var npInfoArrayPtr = XivApi.RaptureAtkModulePtr + Marshal.OffsetOf(typeof(RaptureAtkModule), nameof(RaptureAtkModule.NamePlateInfoArray)).ToInt32();
                         var npInfoPtr = npInfoArrayPtr + Marshal.SizeOf(typeof(RaptureAtkModule.NamePlateInfo)) * Index;
                         _NamePlateInfo = new SafeNamePlateInfo(npInfoPtr);
                     }

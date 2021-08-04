@@ -243,7 +243,7 @@ namespace SeeBuff
 					unsafe
 					{
 						var npObject = addon.GetNamePlateObject(i);
-						if (npObject == null || *(byte*)(npObject.Pointer + 0x60) != 0)
+						if (npObject == null || !npObject.IsVisible)
 							continue;
 
 						var npInfo = npObject.NamePlateInfo;
@@ -256,7 +256,7 @@ namespace SeeBuff
 
 						//if (npInfo.Name != "") PluginLog.Error(i+" "+npInfo.Name+npObject.Pointer.ToString("X"));
 
-						if (*(byte*)(npObject.Pointer + 0x5C) != 0) continue;
+						if (npObject.Data.UnkType != 0) continue; //版本更新要改
 
 						array.Add(actorID, (IntPtr)(*(long*)npObject.Pointer));
 					}

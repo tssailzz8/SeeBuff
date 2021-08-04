@@ -41,4 +41,9 @@
     <None Remove="CExporter\**" />
     <None Remove="ida\CExporter\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FFXIVClientStructs">
+      <HintPath>D:\OG\FF14\Dalamud\FFXIVClientStructs.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
