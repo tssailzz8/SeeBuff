@@ -71,6 +71,7 @@
     <Compile Include="GameObjectManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Targeting.cs" />
     <Compile Include="TextureDictionary.cs" />
     <Compile Include="XivApi.cs" />
   </ItemGroup>
