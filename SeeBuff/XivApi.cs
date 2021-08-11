@@ -1,14 +1,14 @@
-﻿using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
 using Dalamud.Game.ClientState.Actors;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.System.String;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SeeBuff
 {
@@ -167,15 +167,16 @@ namespace SeeBuff
                     return null;
                 }
 
-                var npObjectArrayPtrPtr = Pointer + Marshal.OffsetOf(typeof(AddonNamePlate), nameof(AddonNamePlate.NamePlateObjectArray)).ToInt32();
+                var npObjectArrayPtrPtr = Pointer + 0x450;
                 var npObjectArrayPtr = Marshal.ReadIntPtr(npObjectArrayPtrPtr);
                 if (npObjectArrayPtr == IntPtr.Zero)
                 {
                     PluginLog.Debug($"[{GetType().Name}] NamePlateObjectArray was null");
                     return null;
                 }
+                
 
-                var npObjectPtr = npObjectArrayPtr + Marshal.SizeOf(typeof(AddonNamePlate.NamePlateObject)) * index;
+                var npObjectPtr = npObjectArrayPtr + 0x70 * index;
                 return new SafeNamePlateObject(npObjectPtr, index);
             }
         }
@@ -237,7 +238,7 @@ namespace SeeBuff
                             return null;
                         }
 
-                        var npInfoArrayPtr = XivApi.RaptureAtkModulePtr + Marshal.OffsetOf(typeof(RaptureAtkModule), nameof(RaptureAtkModule.NamePlateInfoArray)).ToInt32();
+                        var npInfoArrayPtr = XivApi.RaptureAtkModulePtr + 0x1A238;
                         var npInfoPtr = npInfoArrayPtr + Marshal.SizeOf(typeof(RaptureAtkModule.NamePlateInfo)) * Index;
                         _NamePlateInfo = new SafeNamePlateInfo(npInfoPtr);
                     }
@@ -246,7 +247,7 @@ namespace SeeBuff
             }
 
             #region Getters
-
+            
             public unsafe IntPtr IconImageNodeAddress => Marshal.ReadIntPtr(Pointer + Marshal.OffsetOf(typeof(AddonNamePlate.NamePlateObject), nameof(AddonNamePlate.NamePlateObject.IconImageNode)).ToInt32());
 
             public AtkImageNode IconImageNode => Marshal.PtrToStructure<AtkImageNode>(IconImageNodeAddress);
@@ -292,29 +293,16 @@ namespace SeeBuff
                 //npObject->IconYAdjust = y;
             }
         }
-        [StructLayout(LayoutKind.Explicit, Size = 0x248)]
-        public unsafe struct NamePlateInfo
-        {
-            [FieldOffset(0x00)] public int ActorID;
-            [FieldOffset(0x52)] public Utf8String Name;
-            [FieldOffset(0xBD)] public Utf8String FcName;
-            [FieldOffset(0x122)] public Utf8String Title;
-            [FieldOffset(0x18A)] public Utf8String DisplayTitle;
-            [FieldOffset(0x1F2)] public Utf8String LevelText;
-            //[FieldOffset(0x240)] public int Flags;
-
-            //public bool IsPrefixTitle => ((Flags >> (8 * 3)) & 0xFF) == 1;
-        }
 
         internal class SafeNamePlateInfo
         {
             public readonly IntPtr Pointer;
-            public readonly NamePlateInfo Data;
+            public readonly RaptureAtkModule.NamePlateInfo Data;
 
             public SafeNamePlateInfo(IntPtr pointer)
             {
-                Pointer = pointer-0x10;
-                Data = Marshal.PtrToStructure<NamePlateInfo>(Pointer);
+                Pointer = pointer;
+                Data = Marshal.PtrToStructure<RaptureAtkModule.NamePlateInfo>(Pointer);
             }
 
             #region Getters
