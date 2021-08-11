@@ -40,6 +40,10 @@
     <Reference Include="Dalamud">
       <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\Dalamud.dll</HintPath>
     </Reference>
+    <Reference Include="FFXIVClientStructs, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\OG\FF14\Dalamud\FFXIVClientStructs.dll</HintPath>
+    </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>..\..\..\..\Downloads\Compressed\Dalamud_v5.2.3.3_beta1\dalamud5261\ImGui.NET.dll</HintPath>
     </Reference>
@@ -79,12 +83,6 @@
     <None Include="ChopBamboo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="lib\FFXIVClientStructs\FFXIVClientStructs.csproj">
-      <Project>{30dba815-2db9-4232-9ea1-6fdf74a5a2c7}</Project>
-      <Name>FFXIVClientStructs</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

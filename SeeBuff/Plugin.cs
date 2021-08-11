@@ -266,14 +266,14 @@ namespace SeeBuff
 			try
 			{
 				if (pi.ClientState.LocalPlayer == null) return;
-				var array = new Dictionary<int, IntPtr>();
+				var array = new Dictionary<int, XivApi.SafeNamePlateObject>();
 				var addon = XivApi.GetSafeAddonNamePlate();
 				for (int i = 0; i < 50; i++)
 				{
 					unsafe
 					{
 						var npObject = addon.GetNamePlateObject(i);
-						if (npObject == null || *(byte*)(npObject.Pointer + 0x60) != 0)
+						if (npObject == null || !npObject.Data.ComponentNode->AtkResNode.IsVisible)
 							continue;
 
 						var npInfo = npObject.NamePlateInfo;
@@ -284,12 +284,12 @@ namespace SeeBuff
 						if (actorID == -1)
 							continue;
 
-						//if (npInfo.Name != "") PluginLog.Error(i+" "+npInfo.Name+npObject.Pointer.ToString("X"));
-						//PluginLog.Log(c.ToString());
-						if (*(byte*)(npObject.Pointer + 0x5C) != 3&& *(byte*)(npObject.Pointer + 0x5C) != 0) continue;
+						
+						if (npObject.Data.NameplateKind != 3 && npObject.Data.NameplateKind != 0) continue;
 
-						array.Add(actorID, (IntPtr)(*(long*)npObject.Pointer));
+						array.Add(actorID, npObject);
 					}
+
 				}
 				foreach (var item in buff1.zidian)
 				{
@@ -313,8 +313,8 @@ namespace SeeBuff
 				var 描边 = new Vector4(this.configuration.背景字体.X, this.configuration.背景字体.Y, this.configuration.背景字体.Z, 175);
 				foreach (var actor in hasmyeffect)
 				{
-					if (!array.TryGetValue(actor.ActorId, out var ptr)) continue;
-					var node = (AtkComponentNode*)ptr;
+					if (!array.TryGetValue(actor.ActorId, out var namePlateObject)) continue;
+					var node = namePlateObject.Data.ComponentNode;
 
 					var pos = new Vector2(node->AtkResNode.X, node->AtkResNode.Y);
 					var level = pi.ClientState.LocalPlayer.Level;
