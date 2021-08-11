@@ -266,211 +266,210 @@ namespace SeeBuff
 			try
 			{
 				if (pi.ClientState.LocalPlayer == null) return;
-				var array = new Dictionary<int, IntPtr>();
+				var array = new Dictionary<int, XivApi.SafeNamePlateObject>();
 				var addon = XivApi.GetSafeAddonNamePlate();
 				for (int i = 0; i < 50; i++)
 				{
 					unsafe
 					{
 						var npObject = addon.GetNamePlateObject(i);
-						if (npObject == null || *(byte*)(npObject.Pointer + 0x60) != 0)
+						if (npObject == null || !npObject.IsVisible)
 							continue;
 
-						var npInfo = npObject.NamePlateInfo;
+                        var npInfo = npObject.NamePlateInfo;
 						if (npInfo == null)
 							continue;
 
 						var actorID = npInfo.Data.ActorID;
 						if (actorID == -1)
 							continue;
-
-						//if (npInfo.Name != "") PluginLog.Error(i+" "+npInfo.Name+npObject.Pointer.ToString("X"));
-						//PluginLog.Log(c.ToString());
-						if (*(byte*)(npObject.Pointer + 0x5C) != 3&& *(byte*)(npObject.Pointer + 0x5C) != 0) continue;
-
-						array.Add(actorID, (IntPtr)(*(long*)npObject.Pointer));
+                        
+                        if (npObject.Data.NameplateKind!=0 && npObject.Data.NameplateKind!=3) continue; 
+						//PluginLog.Error(actorID.ToString("X"));
+						array.Add(actorID, npObject);
 					}
 				}
-				foreach (var item in buff1.zidian)
-				{
-					if (item.Value.ToString() == DateTime.Now.ToString())
-					{
-						PluginLog.Log("删除成功");
-						buff1.zidian.Remove(item.Key);
-						break;
-					}
-					PluginLog.Log(item.Key.ToString());
-				}
-				var statusEnumerable = pi.Data.GetExcelSheet<Status>();
-				var getActionID = pi.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.Action>();
-				var localPlayerActorId = pi.ClientState.LocalPlayer.ActorId;
-				var localPlayerPet = pi.ClientState.Actors.FirstOrDefault(i => i is BattleNpc bnpc && bnpc.OwnerId == localPlayerActorId && bnpc.BattleNpcKind == BattleNpcSubKind.Pet);
-				var hasmyeffect = pi.ClientState.Actors.Where(i => i.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.Player|| i.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.BattleNpc);
-				var bdl = ImGui.GetBackgroundDrawList(ImGui.GetMainViewport());
-				var b = (uint)ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, this.configuration.透明));
-				//PluginLog.Log("b是{0}",b.ToString("x"));
-				this.configuration.Value = new Vector4(this.configuration.Value1.X, this.configuration.Value1.Y, this.configuration.Value1.Z, this.configuration.透明);
-				var 描边 = new Vector4(this.configuration.背景字体.X, this.configuration.背景字体.Y, this.configuration.背景字体.Z, 175);
-				foreach (var actor in hasmyeffect)
-				{
-					if (!array.TryGetValue(actor.ActorId, out var ptr)) continue;
-					var node = (AtkComponentNode*)ptr;
 
-					var pos = new Vector2(node->AtkResNode.X, node->AtkResNode.Y);
-					var level = pi.ClientState.LocalPlayer.Level;
+                foreach (var item in buff1.zidian)
+                {
+                    if (item.Value.ToString() == DateTime.Now.ToString())
+                    {
+                        PluginLog.Log("删除成功");
+                        buff1.zidian.Remove(item.Key);
+                        break;
+                    }
+                    PluginLog.Log(item.Key.ToString());
+                }
+                var statusEnumerable = pi.Data.GetExcelSheet<Status>();
+                var getActionID = pi.Data.GetExcelSheet<Lumina.Excel.GeneratedSheets.Action>();
+                var localPlayerActorId = pi.ClientState.LocalPlayer.ActorId;
+                var localPlayerPet = pi.ClientState.Actors.FirstOrDefault(i => i is BattleNpc bnpc && bnpc.OwnerId == localPlayerActorId && bnpc.BattleNpcKind == BattleNpcSubKind.Pet);
+                var hasmyeffect = pi.ClientState.Actors.Where(i => i.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.Player || i.ObjectKind == Dalamud.Game.ClientState.Actors.ObjectKind.BattleNpc);
+                var bdl = ImGui.GetBackgroundDrawList(ImGui.GetMainViewport());
+                var b = (uint)ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, this.configuration.透明));
+                //PluginLog.Log("b是{0}",b.ToString("x"));
+                this.configuration.Value = new Vector4(this.configuration.Value1.X, this.configuration.Value1.Y, this.configuration.Value1.Z, this.configuration.透明);
+                var 描边 = new Vector4(this.configuration.背景字体.X, this.configuration.背景字体.Y, this.configuration.背景字体.Z, 175);
+                foreach (var actor in hasmyeffect)
+                {
+                    if (!array.TryGetValue(actor.ActorId, out var ptr)) continue;
+                    var node = ptr.Data.ComponentNode;
 
-					if (!pi.ClientState.Condition[ConditionFlag.InCombat] && this.configuration.战斗)
-					{
-						continue;
-					}
-					if (!this.configuration.自己 && actor.ActorId == localPlayerActorId)
-					{
-						continue;
-					}
-					var StatusFlag = Marshal.ReadByte(actor.Address + 0X1980);
-					if (!((StatusFlag & (byte)StatusFlags.PartyMember) > 0) && configuration.party)
-					{
-						continue;
-					}
-					var screenPosOriginal = new Vector2(pos.X - this.configuration.x位置, pos.Y - this.configuration.y位置);
+                    var pos = new Vector2(node->AtkResNode.X, node->AtkResNode.Y);
+                    var level = pi.ClientState.LocalPlayer.Level;
 
-					var effects = actor.StatusEffects
-						.Where(i => i.OwnerId == localPlayerActorId || i.OwnerId == localPlayerPet?.ActorId || configuration.减伤 && 减伤.Contains((ushort)i.EffectId)|| this.configuration.userBuffIds.Contains((uint)i.EffectId) || (i.EffectId == 496 && this.configuration.renshu) || buff1.zidian.ContainsKey(i.EffectId))
-						.Where(i => i.Duration > 0 && i.Duration < 40)
-						.Select((effect, i) => (effect, i));
-					count = effects.Count();
-					screenPosOriginal += new Vector2((float)node->AtkResNode.Width / 2 - 6.25f - 12.5f * count, 0);
-					if (this.configuration.背景 && count > 0)
-					{
+                    if (!pi.ClientState.Condition[ConditionFlag.InCombat] && this.configuration.战斗)
+                    {
+                        continue;
+                    }
+                    if (!this.configuration.自己 && actor.ActorId == localPlayerActorId)
+                    {
+                        continue;
+                    }
+                    var StatusFlag = Marshal.ReadByte(actor.Address + 0X1980);
+                    if (!((StatusFlag & (byte)StatusFlags.PartyMember) > 0) && configuration.party)
+                    {
+                        continue;
+                    }
+                    var screenPosOriginal = new Vector2(pos.X - this.configuration.x位置, pos.Y - this.configuration.y位置);
 
-						bdl.AddRectFilled(new Vector2(screenPosOriginal.X - this.configuration.背图片x, screenPosOriginal.Y - 2 - this.configuration.背图片y), new Vector2(screenPosOriginal.X + 7 + 25 * count - this.configuration.背图片x, screenPosOriginal.Y + 45 - this.configuration.背图片y), 0x80000000, 3);
-					}
-					foreach (var effect in effects)
-					{
-						if (effect.effect.EffectId == 497)
-						{
-							this.configuration.生杀 = true;
-						}
-						var status = statusEnumerable.GetRow((uint)effect.effect.EffectId);
-						var textureWrap = TextureDictionary[status.Icon];
-						if (textureWrap == null) continue;
-						var texsize = new Vector2(textureWrap.Width, textureWrap.Height);
-						var screenPos1 = screenPosOriginal + new Vector2(texsize.X / 5, 20);
-						var screenPos2 = screenPosOriginal + new Vector2(texsize.X * 2 / 5 - 1, 20);
-						if (effect.effect.EffectId == 496 && this.configuration.renshu)
-						{
-							var 忍术种类 = effect.effect.StackCount;
-							switch (忍术种类)
-							{
-								case 1:
-								case 2:
-								case 3:
-									status_renshu = getActionID.GetRow(2265);//手里剑
-									break;
-								case 6:
-								case 7:
-									if (this.configuration.生杀)
-										status_renshu = getActionID.GetRow(16491);
-									else
-										status_renshu = getActionID.GetRow(2266);//火遁
-									break;
-								case 9:
-								case 11:
-									status_renshu = getActionID.GetRow(2267);//雷遁
-									break;
-								case 13:
-								case 14:
-									if (this.configuration.生杀)
-										status_renshu = getActionID.GetRow(16492);
-									else
-										status_renshu = getActionID.GetRow(2268);//冰遁
-									break;
-								case 27:
-								case 30:
-									status_renshu = getActionID.GetRow(2269);//风遁
-									break;
-								case 39:
-								case 45:
-									status_renshu = getActionID.GetRow(2270);//土遁
-									break;
-								case 54:
-								case 57:
-									status_renshu = getActionID.GetRow(2271);//水遁
-									break;
-								default:
-									status_renshu = getActionID.GetRow(2272);
-									break;
-							}
-							textureWrap_renshu = TextureDictionary[status_renshu.Icon];
-							var texsize_renshu = new Vector2(24, 26);
-							var screenPos_renshu = screenPosOriginal + new Vector2(texsize_renshu.X / 5, 20);
-							bdl.AddImage(textureWrap_renshu.ImGuiHandle,
-							screenPosOriginal + new Vector2(25 * effect.i + 4, 3),
-							screenPosOriginal + new Vector2(25 * effect.i, 0) + texsize_renshu, Vector2.Zero, Vector2.One, b);
-						}
-						else
-						{
-							bdl.AddImage(textureWrap.ImGuiHandle,
-								screenPosOriginal + new Vector2(25 * effect.i, 0),
-								screenPosOriginal + new Vector2(25 * effect.i, 0) + texsize, Vector2.Zero, Vector2.One, b);
-						}
-						ImGui.Begin("##buffdrawlist",
-							ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav |
-							ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground);
-						ImGui.SetWindowFontScale(1.5f);
-						//PluginLog.Log(this.configuration.Value.ToString("x"));
-						if (effect.effect.Duration >= 9.5f)
-						{
-							if (this.configuration.描边)
-							{
-								bdl.AddText(screenPos1 + new Vector2(25 * effect.i - 1, -1),
+                    var effects = actor.StatusEffects
+                        .Where(i => i.OwnerId == localPlayerActorId || i.OwnerId == localPlayerPet?.ActorId || configuration.减伤 && 减伤.Contains((ushort)i.EffectId) || this.configuration.userBuffIds.Contains((uint)i.EffectId) || (i.EffectId == 496 && this.configuration.renshu) || buff1.zidian.ContainsKey(i.EffectId))
+                        .Where(i => i.Duration > 0 && i.Duration < 40)
+                        .Select((effect, i) => (effect, i));
+                    count = effects.Count();
+                    screenPosOriginal += new Vector2((float)node->AtkResNode.Width / 2 - 6.25f - 12.5f * count, 0);
+                    if (this.configuration.背景 && count > 0)
+                    {
+
+                        bdl.AddRectFilled(new Vector2(screenPosOriginal.X - this.configuration.背图片x, screenPosOriginal.Y - 2 - this.configuration.背图片y), new Vector2(screenPosOriginal.X + 7 + 25 * count - this.configuration.背图片x, screenPosOriginal.Y + 45 - this.configuration.背图片y), 0x80000000, 3);
+                    }
+                    foreach (var effect in effects)
+                    {
+                        if (effect.effect.EffectId == 497)
+                        {
+                            this.configuration.生杀 = true;
+                        }
+                        var status = statusEnumerable.GetRow((uint)effect.effect.EffectId);
+                        var textureWrap = TextureDictionary[status.Icon];
+                        if (textureWrap == null) continue;
+                        var texsize = new Vector2(textureWrap.Width, textureWrap.Height);
+                        var screenPos1 = screenPosOriginal + new Vector2(texsize.X / 5, 20);
+                        var screenPos2 = screenPosOriginal + new Vector2(texsize.X * 2 / 5 - 1, 20);
+                        if (effect.effect.EffectId == 496 && this.configuration.renshu)
+                        {
+                            var 忍术种类 = effect.effect.StackCount;
+                            switch (忍术种类)
+                            {
+                                case 1:
+                                case 2:
+                                case 3:
+                                    status_renshu = getActionID.GetRow(2265);//手里剑
+                                    break;
+                                case 6:
+                                case 7:
+                                    if (this.configuration.生杀)
+                                        status_renshu = getActionID.GetRow(16491);
+                                    else
+                                        status_renshu = getActionID.GetRow(2266);//火遁
+                                    break;
+                                case 9:
+                                case 11:
+                                    status_renshu = getActionID.GetRow(2267);//雷遁
+                                    break;
+                                case 13:
+                                case 14:
+                                    if (this.configuration.生杀)
+                                        status_renshu = getActionID.GetRow(16492);
+                                    else
+                                        status_renshu = getActionID.GetRow(2268);//冰遁
+                                    break;
+                                case 27:
+                                case 30:
+                                    status_renshu = getActionID.GetRow(2269);//风遁
+                                    break;
+                                case 39:
+                                case 45:
+                                    status_renshu = getActionID.GetRow(2270);//土遁
+                                    break;
+                                case 54:
+                                case 57:
+                                    status_renshu = getActionID.GetRow(2271);//水遁
+                                    break;
+                                default:
+                                    status_renshu = getActionID.GetRow(2272);
+                                    break;
+                            }
+                            textureWrap_renshu = TextureDictionary[status_renshu.Icon];
+                            var texsize_renshu = new Vector2(24, 26);
+                            var screenPos_renshu = screenPosOriginal + new Vector2(texsize_renshu.X / 5, 20);
+                            bdl.AddImage(textureWrap_renshu.ImGuiHandle,
+                            screenPosOriginal + new Vector2(25 * effect.i + 4, 3),
+                            screenPosOriginal + new Vector2(25 * effect.i, 0) + texsize_renshu, Vector2.Zero, Vector2.One, b);
+                        }
+                        else
+                        {
+                            bdl.AddImage(textureWrap.ImGuiHandle,
+                                screenPosOriginal + new Vector2(25 * effect.i, 0),
+                                screenPosOriginal + new Vector2(25 * effect.i, 0) + texsize, Vector2.Zero, Vector2.One, b);
+                        }
+                        ImGui.Begin("##buffdrawlist",
+                            ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav |
+                            ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground);
+                        ImGui.SetWindowFontScale(1.5f);
+                        //PluginLog.Log(this.configuration.Value.ToString("x"));
+                        if (effect.effect.Duration >= 9.5f)
+                        {
+                            if (this.configuration.描边)
+                            {
+                                bdl.AddText(screenPos1 + new Vector2(25 * effect.i - 1, -1),
 (uint)ImGui.ColorConvertFloat4ToU32(描边),
 effect.effect.Duration.ToString("f0"));
-								bdl.AddText(screenPos1 + new Vector2(25 * effect.i - 1, 1),
-							(uint)ImGui.ColorConvertFloat4ToU32(描边),
-							effect.effect.Duration.ToString("f0"));
-								bdl.AddText(screenPos1 + new Vector2(25 * effect.i + 1, -1),
-							(uint)ImGui.ColorConvertFloat4ToU32(描边),
-							effect.effect.Duration.ToString("f0"));
-								bdl.AddText(screenPos1 + new Vector2(25 * effect.i + 1, 1),
-							(uint)ImGui.ColorConvertFloat4ToU32(描边),
-							effect.effect.Duration.ToString("f0"));
-							}
+                                bdl.AddText(screenPos1 + new Vector2(25 * effect.i - 1, 1),
+                            (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                            effect.effect.Duration.ToString("f0"));
+                                bdl.AddText(screenPos1 + new Vector2(25 * effect.i + 1, -1),
+                            (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                            effect.effect.Duration.ToString("f0"));
+                                bdl.AddText(screenPos1 + new Vector2(25 * effect.i + 1, 1),
+                            (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                            effect.effect.Duration.ToString("f0"));
+                            }
 
-							bdl.AddText(screenPos1 + new Vector2(25 * effect.i, 0),
-						(uint)ImGui.ColorConvertFloat4ToU32(configuration.Value),
-						effect.effect.Duration.ToString("f0"));
-						}
-						else
-						{
-							if (this.configuration.描边)
-							{
-								bdl.AddText(screenPos2 + new Vector2(25 * effect.i - 1, -1),
-						(uint)ImGui.ColorConvertFloat4ToU32(描边),
-						effect.effect.Duration.ToString("f0"));
-								bdl.AddText(screenPos2 + new Vector2(25 * effect.i - 1, 1),
-							(uint)ImGui.ColorConvertFloat4ToU32(描边),
-							effect.effect.Duration.ToString("f0"));
-								bdl.AddText(screenPos2 + new Vector2(25 * effect.i + 1, -1),
-							(uint)ImGui.ColorConvertFloat4ToU32(描边),
-							effect.effect.Duration.ToString("f0"));
-								bdl.AddText(screenPos2 + new Vector2(25 * effect.i + 1, 1),
-							(uint)ImGui.ColorConvertFloat4ToU32(描边),
-							effect.effect.Duration.ToString("f0"));
-							}
+                            bdl.AddText(screenPos1 + new Vector2(25 * effect.i, 0),
+                        (uint)ImGui.ColorConvertFloat4ToU32(configuration.Value),
+                        effect.effect.Duration.ToString("f0"));
+                        }
+                        else
+                        {
+                            if (this.configuration.描边)
+                            {
+                                bdl.AddText(screenPos2 + new Vector2(25 * effect.i - 1, -1),
+                        (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                        effect.effect.Duration.ToString("f0"));
+                                bdl.AddText(screenPos2 + new Vector2(25 * effect.i - 1, 1),
+                            (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                            effect.effect.Duration.ToString("f0"));
+                                bdl.AddText(screenPos2 + new Vector2(25 * effect.i + 1, -1),
+                            (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                            effect.effect.Duration.ToString("f0"));
+                                bdl.AddText(screenPos2 + new Vector2(25 * effect.i + 1, 1),
+                            (uint)ImGui.ColorConvertFloat4ToU32(描边),
+                            effect.effect.Duration.ToString("f0"));
+                            }
 
-							bdl.AddText(screenPos2 + new Vector2(25 * effect.i, 0),
-						(uint)ImGui.ColorConvertFloat4ToU32(configuration.Value),
-						effect.effect.Duration.ToString("f0"));
-						}
-						ImGui.End();
-						//ImGui.PopStyleColor();
+                            bdl.AddText(screenPos2 + new Vector2(25 * effect.i, 0),
+                        (uint)ImGui.ColorConvertFloat4ToU32(configuration.Value),
+                        effect.effect.Duration.ToString("f0"));
+                        }
+                        ImGui.End();
+                        //ImGui.PopStyleColor();
 
 
-					}
-				}
+                    }
+                }
 
-				array.Clear();
+                array.Clear();
 				this.configuration.生杀 = false;
 			}
 
